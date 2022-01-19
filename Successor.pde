@@ -3,73 +3,58 @@ public class successorParticle implements part{
  float iSpeed;
  float x, y;
  float xn, yn;
- int amount;
+ int number;
  float limit;
  float chance;
  float direction, directionMod;
  float strength;
- successorParticle(int x, int y, float speed, int ix, int iy, float successorLimit, float successorChance, float direction, float directionMod, float strength, float colorShift, float saturation, float brightness){
+ float ampness;
+ color c;
+ float colorShift, saturation, brightness;
+ successorParticle(int x, int y, float speed, float successorLimit, float successorChance, float strength, float colorShift, float saturation, float brightness, float ampness){
    this.x=x;
    this.y=y;
    this.ix = x;
    this.iy = y;
    this.strength = strength;
+   this.ampness = ampness;
    this.limit = random(successorLimit);
    iSpeed = speed;
    this.chance = successorChance;
-   if(dist(ix,iy,x,y)<50){this.amount=4;}
-   else if(dist(ix,iy,x,y)<100){this.amount=3;}
-   else if(dist(ix,iy,x,y)<160){this.amount=2;}
-   else if(dist(ix,iy,x,y)<220){this.amount=1;}
-   this.direction = direction+random(radians(50-directionMod))-random(radians(50-directionMod));
-   this.directionMod = directionMod+2;
+   direction = random(radians(360));
    xn = cos(this.direction)*iSpeed;
    yn = sin(this.direction)*iSpeed;
-   
    this.colorShift = colorShift;
    this.saturation = saturation;
    this.brightness = brightness;
-   
-   setColor();
  }
- 
- float colorShift, saturation, brightness;
- color c;
- 
  void setColor(){
-   color d = image.pixels[int(x)+int(y)*width];
-   color d2 = pixels[int(x)+int(y)*width];
-   
-   float h = random(hue(d-1),hue(d+1));
-   float s = saturation(d)*saturation;
-   float b = brightness(d)*brightness;
-   
-   colorShift = h;
-
-   
-   c = color(h,s,b);
+   color d = image.pixels[int(x)+int(y)*image.width];
+   c = color((hue(d)/ampness)+colorShift,saturation(d)+saturation,brightness(d)+brightness);
  }
  
  void show(){
+  setColor();
+  //try{
   pixels[int(x)+int(y)*width] = c;
+  //}catch(ArrayIndexOutOfBoundsException e){}
  }
  
  void move(){
-  x = x + xn;
-  y = y + yn;
-  
+  this.x = this.x + xn;
+  this.y = this.y + yn;
   if(checkBounds()){
     removeFountain(this);
   }
   else{
-    if(dist(ix,iy,x,y)>random(10*strength*2,50*strength*2)){
+    if(dist(x,y,this.x,this.y)>dist(x,y,this.ix,this.iy)){
       removeFountain(this);
-      if(random(1)<=chance){ createSuccessor(int(x),int(y),iSpeed/1.05,random(1,limit)/this.amount, ix, iy, limit, chance/1.1, direction, directionMod, strength, colorShift,saturation,brightness); }
+      if(random(1)<=chance){ createSuccessor(int(x),int(y),iSpeed,random(1,limit)/3, limit, chance/(100/amount), strength, -this.colorShift,this.saturation,this.brightness,this.ampness); }
     }
   }
  }
  
  boolean checkBounds(){
-   return y<=0 || y>=height || x<=0 || x>=width;
+   return y<=0 || y>=image.height || x<=0 || x>=image.width;
  } 
 } 

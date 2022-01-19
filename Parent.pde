@@ -7,8 +7,11 @@ public class particle implements part{
  float successorChance;
  float direction;
  float strength;
+ float ampness;
+ color c;
+ float colorShift, saturation, brightness;
  
- particle(int x, int y, float speed, float successorChance, float strength, float colorShift, float saturation, float brightness){
+ particle(int x, int y, float speed, float successorChance, float strength, float colorShift, float saturation, float brightness, float ampness){
    this.x=x;
    this.y=y;
    ix = x;
@@ -16,35 +19,24 @@ public class particle implements part{
    this.speed = speed;
    this.successorChance = successorChance;
    this.strength = strength;
-   limit = random(25);
+   this.ampness=ampness;
+   limit = random(strength);
    direction = random(TWO_PI);
    xn = cos(direction)*speed;
    yn = sin(direction)*speed;
-   setColor();
-   
    this.colorShift = colorShift;
    this.saturation = saturation;
    this.brightness = brightness;
  }
- 
- color c;
- 
- float colorShift, saturation, brightness;
- 
  void setColor(){
-   color d = image.pixels[int(x)+int(y)*width];
-
-   float h = hue(d) * colorShift;
-   colorShift = h;
-   float s = saturation(d) * saturation;
-   float b = brightness(d) * brightness;
-   
-   c = color(h,s,b);
+   color d = image.pixels[int(x)+int(y)*image.width];
+   c = color(hue(d)/ampness+colorShift,saturation(d)+saturation,brightness(d)+brightness);
  }
  
 
  void show(){
-  pixels[int(x)+int(y)*width] = c;
+   setColor();
+   pixels[int(x)+int(y)*width] = c;
  }
  
  void move(){
@@ -52,12 +44,13 @@ public class particle implements part{
   y = y + yn;
   
   if(!checkBounds()){
-      if(random(1)<=successorChance){ createSuccessor(int(x),int(y),(speed/1.05),10*strength, ix, iy, limit, successorChance/1.1, direction, 2, strength, colorShift, saturation, brightness); }
+      if(random(1)<=successorChance) createSuccessor(int(x),int(y),speed,10*strength,limit,(successorChance/(100/amount)),strength,-this.colorShift,this.saturation,this.brightness,this.ampness); 
+      removeFountain(this);
     }
-  removeFountain(this);
+
  }
  
  boolean checkBounds(){
-   return y<=0 || y>=height || x<=0 || x>=width;
+   return y<=0 || y>=image.height || x<=0 || x>=image.width;
  }
 }
